@@ -12,6 +12,7 @@ app.use(express.json());
 
 app.post("/api/users", createNewUser);
 app.get("/api/users", getAllUsers);
+app.get("/api/users/:id", getUserById);
 
 function createNewUser(req, res) {
   const user = {
@@ -46,6 +47,28 @@ function getAllUsers(req, res) {
         success: true,
         user
       });
+    })
+    .catch(error => {
+      res.status(500).json({
+        success: false,
+        error: "The user information could not be retrieved."
+      });
+    });
+}
+
+function getUserById(req, res) {
+  const { id } = req.params;
+  db.findById(id)
+
+    .then(user => {
+      if (!user) {
+        res.status(404).json({
+          success: false,
+          message: "The user with the specified ID does not exist."
+        });
+      } else {
+        res.status(201).json({ success: true, user });
+      }
     })
     .catch(error => {
       res.status(500).json({
