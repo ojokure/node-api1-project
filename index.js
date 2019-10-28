@@ -15,31 +15,44 @@ app.get("/api/users", getAllUsers);
 
 function createNewUser(req, res) {
   const user = {
-    name: req.body.name
+    name: req.body.name,
+    bio: req.body.bio
   };
 
   db.insert(user)
     .then(data => {
-      res.status(201).json({ succes: true, data });
+      if (!user.name || !user.bio) {
+        res.status(400).json({
+          success: false,
+          errorMessage: "Please provide name and bio for the user."
+        });
+      } else {
+        user.id = data.id;
+        res.status(201).json({ succes: true, user });
+      }
     })
     .catch(error => {
       res.status(500).json({
         success: false,
-        error
+        error: "There was an error while saving the user to the database"
       });
     });
 }
 
 function getAllUsers(req, res) {
   db.find()
-  .then(users => {
-    res.status(200).json(users);
-  })
-  .catch(error => {
-    res.status(500).json({
-      success:false, err,
+    .then(users => {
+      res.status(200).json({
+        success: true,
+        user
+      });
+    })
+    .catch(error => {
+      res.status(500).json({
+        success: false,
+        error: "The user information could not be retrieved."
+      });
     });
-  })
 }
 
 app.listen(process.env.PORT || 8000, () => {
