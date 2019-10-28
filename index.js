@@ -11,11 +11,11 @@ app.use(cors());
 app.use(express.json());
 
 app.post("/api/users", createNewUser);
+app.get("/api/users", getAllUsers);
 
 function createNewUser(req, res) {
   const user = {
     name: req.body.name
-    // body: req.body.bio
   };
 
   db.insert(user)
@@ -28,6 +28,18 @@ function createNewUser(req, res) {
         error
       });
     });
+}
+
+function getAllUsers(req, res) {
+  db.find()
+  .then(users => {
+    res.status(200).json(users);
+  })
+  .catch(error => {
+    res.status(500).json({
+      success:false, err,
+    });
+  })
 }
 
 app.listen(process.env.PORT || 8000, () => {
