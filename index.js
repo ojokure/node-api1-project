@@ -13,7 +13,7 @@ app.use(express.json());
 app.post("/api/users", createNewUser);
 app.get("/api/users", getAllUsers);
 app.get("/api/users/:id", getUserById);
-app.get("/api/users/:id", deleteUser);
+app.delete("/api/users/:id", deleteUser);
 
 function createNewUser(req, res) {
   const user = {
@@ -80,19 +80,15 @@ function getUserById(req, res) {
 }
 
 function deleteUser(req, res) {
-  const id = req.params;
+  const { id } = req.params;
   db.remove(id)
 
-    .then(user => {
-      if (user === 0) {
-        res.status(404).json({
-          success: false,
-          message: "The user with the specified ID does not exist."
-        });
+    .then(deleted => {
+      if (deleted) {
+        res.status(204).end();
       } else {
-        res.status(201).json({
-          success: true,
-          user
+        res.status(404).json({
+          message: "The user with the specified ID does not exist."
         });
       }
     })
@@ -102,6 +98,32 @@ function deleteUser(req, res) {
         error: "The user could not be removed"
       })
     );
+}
+
+function createNewUser(req, res) {
+  const user = {
+    name: req.body.name,
+    bio: req.body.bio
+  };
+
+  db.insert(user)
+    .then(data => {
+      if (!user.name || !user.bio) {
+        res.status(400).json({
+          success: false,
+          errorMessage: "Please provide name and bio for the user."
+        });
+      } else {
+        user.id = data.id;
+        res.status(201).json({ succes: true, user });
+      }
+    })
+    .catch(error => {
+      res.status(500).json({
+        success: false,
+        error: "There was an error while saving the user to the database"
+      });
+    });
 }
 
 app.listen(process.env.PORT || 8000, () => {
