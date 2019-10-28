@@ -14,6 +14,7 @@ app.post("/api/users", createNewUser);
 app.get("/api/users", getAllUsers);
 app.get("/api/users/:id", getUserById);
 app.delete("/api/users/:id", deleteUser);
+app.put("/api/users/:id", updateUsers);
 
 function createNewUser(req, res) {
   const user = {
@@ -100,28 +101,33 @@ function deleteUser(req, res) {
     );
 }
 
-function createNewUser(req, res) {
-  const user = {
-    name: req.body.name,
-    bio: req.body.bio
-  };
+function updateUsers(req, res) {
+  const { id } = req.params;
+  const changes = req.body;
 
-  db.insert(user)
-    .then(data => {
-      if (!user.name || !user.bio) {
+  db.update(id, changes)
+    .then(updated => {
+      if (!changes.name || !changes.bio) {
         res.status(400).json({
           success: false,
           errorMessage: "Please provide name and bio for the user."
         });
+      } else if (!changes) {
+        res.status(404).json({
+          succes: false,
+          message: "The user with the specified ID does not exist."
+        });
       } else {
-        user.id = data.id;
-        res.status(201).json({ succes: true, user });
+        res.status(200).json({
+          success: true,
+          updated
+        });
       }
     })
     .catch(error => {
       res.status(500).json({
         success: false,
-        error: "There was an error while saving the user to the database"
+        error: "The user information could not be modified."
       });
     });
 }
