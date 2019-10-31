@@ -10,6 +10,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+app.get("/", (req, res) => {
+  res.send(`<h2> IT WORKS!</h2>`);
+});
+
 app.post("/api/users", createNewUser);
 app.get("/api/users", getAllUsers);
 app.get("/api/users/:id", getUserById);
